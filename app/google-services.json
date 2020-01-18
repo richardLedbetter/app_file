@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "644983155745",
+    "firebase_url": "https://roommangement.firebaseio.com",
+    "project_id": "roommangement",
+    "storage_bucket": "roommangement.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:644983155745:android:9da32ed89ad719e2d0c760",
+        "android_client_info": {
+          "package_name": "com.example.roommangement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "644983155745-k4cm4g0pft2qpepqga81j05lbev6qm5b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-ldawNsjbN-ZzLGSQ7n3vCbu5FzRUBMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "644983155745-k4cm4g0pft2qpepqga81j05lbev6qm5b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
