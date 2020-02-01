@@ -1,0 +1,42 @@
+{
+  "UserAgent": "MobileHub/1.0",
+  "Version": "1.0",
+  "CredentialsProvider": {
+    "CognitoIdentity": {
+      "Default": {
+        "PoolId": "us-west-2:77af2ab2-5d51-45e6-a207-1b0a95bc42c5",
+        "Region": "us-west-2"
+      }
+    }
+  },
+  "IdentityManager": {
+    "Default": {}
+  },
+  "S3TransferUtility": {
+    "Default": {
+      "Bucket": "roommangement-userfiles-mobilehub-1238189679",
+      "Region": "us-west-1"
+    }
+  },
+  "PinpointAnalytics": {
+    "Default": {
+      "AppId": "ea92088090fb488386b096369a63722b",
+      "Region": "us-east-1"
+    }
+  },
+  "PinpointTargeting": {
+    "Default": {
+      "Region": "us-east-1"
+    }
+  },
+  "UserFileManager": {
+    "Default": {
+      "Bucket": "roommangement-userfiles-mobilehub-1238189679",
+      "Region": "us-west-1"
+    }
+  },
+  "GoogleSignIn": {
+    "ClientId-WebApp": "742932088080-5gv6tuso1cau4iml7sljqqimtkut7p86.apps.googleusercontent.com",
+    "Permissions": "email,profile,openid"
+  }
+}
