@@ -43,7 +43,7 @@ public class cordinator {
         return orchestrate;
     }
 
-    Context screen;
+    public Context screen;
     public void setScreen(Context curr_screen){
         screen = curr_screen;
     }
@@ -63,7 +63,7 @@ public class cordinator {
     String key;
     public String file_path;
     public String Bucket;
-    String pool = "us-west-2:e4f1669c-a472-43e4-8fc2-73de20022289";
+    public String pool = "us-west-2:e4f1669c-a472-43e4-8fc2-73de20022289";
 
     public void set_pool(String pools){pool = pools;}
     public void set_bucket(String buckets){Bucket = buckets;}

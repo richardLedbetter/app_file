@@ -24,6 +24,7 @@ import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemResult;
 import com.example.roommangement.AWS_Services.cordinator;
+import com.example.roommangement.AWS_Services.download_files;
 import com.example.roommangement.MainActivity;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
@@ -56,15 +57,30 @@ public class db_cordinator {
     //working tools
     private Table curr_table;
     AmazonDynamoDBClient table_client;
-
+    public Map token;
 
     CognitoCachingCredentialsProvider creds;
     // Create a new credentials provider
+    public void set_token(Map k){
+        token =k;
+    }
     public void load_table(){
         String TAG = "p";
-        creds = new CognitoCachingCredentialsProvider(
-                screen, Pool, Region);
+        download_files downlink = download_files.get_server_down();
+         creds = new CognitoCachingCredentialsProvider(
+                downlink.vals.screen, // get the context for the current activity
+                "231867092748", // your AWS Account id
+                downlink.vals.pool, // your identity pool id
+                "arn:aws:iam::231867092748:role/Cognito_test_hotelUnauth_Role",// an authenticated role ARN
+                "arn:aws:iam::231867092748:role/Cognito_test_hotelAuth_Role", // an unauthenticated role ARN
+                Regions.US_WEST_2 //Region
+        );
+        /*creds = new CognitoCachingCredentialsProvider(
+                screen,
+                Pool,
+                Region);*/
             // Create a connection to DynamoDB
+        creds.setLogins(token);
         table_client= new AmazonDynamoDBClient(creds);
         table_client.setRegion(com.amazonaws.regions.Region.getRegion(Regions.US_WEST_1));
         curr_table = Table.loadTable(table_client, Table_name);

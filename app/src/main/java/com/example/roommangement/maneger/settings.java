@@ -46,7 +46,7 @@ public class settings extends AppCompatActivity {
             }
 
             downlink.setScreen(this);
-            downlink.s3credentialsProvider();
+           // downlink.s3credentialsProvider();
             downlink.setTransferUtility();
             test = table.getAllMemos();
             Log.d(TAG, test.get(0).toString());

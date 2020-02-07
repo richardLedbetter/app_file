@@ -162,7 +162,7 @@ public class see_Maintence extends AppCompatActivity {
             Log.d("look here ", downed.getName());
         }
         downlink.setScreen(this);
-        downlink.s3credentialsProvider();
+        //downlink.s3credentialsProvider();
         downlink.setTransferUtility();
         downlink.set_bucket("room-check-test");
         //file selector

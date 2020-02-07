@@ -165,7 +165,7 @@ public class maid_home_screen extends AppCompatActivity {
         }
 
         downlink.setScreen(this);
-        downlink.s3credentialsProvider();
+       // downlink.s3credentialsProvider();
         downlink.setTransferUtility();
         List<Document> test = table.getAllMemos();
         Log.d(TAG, test.get(0).toString());

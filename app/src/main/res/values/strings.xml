@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">RoomMangement</string>
+    <string name="welcome_to_appauth">Welcome to AppAuth Codelab</string>
+    <string name="make_api_call">Make API Call</string>
+    <string name="make_authorization_request">Make Authorization Request</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="request_complete">API Call Successful.</string>
+    <string name="request_failed">API Call Failed.</string>
 </resources>

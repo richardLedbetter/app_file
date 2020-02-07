@@ -48,6 +48,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.roommangement.AWS_Cognito.aws_cognito;
 import com.example.roommangement.AWS_Services.*;
 import com.example.roommangement.AWS_dynamodb.db_cordinator;
 import com.example.roommangement.global_vars.auths;
@@ -80,6 +81,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -111,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
     AppCompatTextView mFamilyName;
     AppCompatTextView mFullName;
     ImageView mProfileView;
+    Context holder = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +124,18 @@ public class MainActivity extends AppCompatActivity {
         //
 
         String TAG = "GOOGLE";
+        Intent intent = getIntent();
+        if(intent!=null){
+            Thread ta = new Thread(()->{
+                try{
+                    handleAuthorizationResponse(intent);
+                }catch (Exception e){
+                    Log.d(TAG, "onCreate: broken");
+                }
+                
+            });
+            ta.start();
+        }
 
 
         // Add a call to initialize AWSMobileClient
@@ -130,11 +146,7 @@ public class MainActivity extends AppCompatActivity {
         );
         Log.d("view", "onCreate: ");
 
-
-
 // Add the request to the RequestQueue.
-
-
 
         uplink = new upload_files();
         uplink.setScreen(this);
@@ -162,44 +174,45 @@ public class MainActivity extends AppCompatActivity {
             onClick();
         });
 
-
-       /* SignInButton signInButton = findViewById(R.id.sign_in_button);
-        signInButton.setMinimumWidth(dpwidth);
-        signInButton.setMinimumHeight((int)(dpHeight*.2));
-        signInButton.setOnClickListener(this::onClick);*/
     }
 
-    private void updateUI(GoogleSignInAccount account) {
-    }
 
     public void google_log_in(View view){
         //https://codelabs.developers.google.com/codelabs/appauth-android-codelab/#5
-        Log.d("working", "google_log_in: ");
-        String clientId = "511828570984-fuprh0cm7665emlne3rnf9pk34kkn86s.apps.googleusercontent.com";
-        Uri redirectUri = Uri.parse("com.google.codelabs.appauth:/oauth2callback");
-        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
-                serviceConfiguration,
-                clientId,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
-                redirectUri
-        );
-        builder.setScopes("profile");
-        AuthorizationRequest request = builder.build();
+        Thread tmp = new Thread(()->{
+            Log.d("working", "google_log_in: ");
+            String clientId = "742932088080-l4ve9odnp9j10gd65hectcks1vktbvra.apps.googleusercontent.com";
+            String url="com.example.roommangement%3A/oauth2redirect";
+            Uri redirectUri = Uri.parse("com.example.roommangement:/oauth2callback");
+            AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+                    serviceConfiguration,
+                    clientId,
+                    AuthorizationRequest.RESPONSE_TYPE_CODE,
+                    redirectUri
+            );
+            builder.setScopes("profile");
+            AuthorizationRequest request = builder.build();
 
 
-        //https://codelabs.developers.google.com/codelabs/appauth-android-codelab/#6
-        AuthorizationService authorizationService = new AuthorizationService(view.getContext());
+            //https://codelabs.developers.google.com/codelabs/appauth-android-codelab/#6
+            AuthorizationService authorizationService = new AuthorizationService(view.getContext());
 
-        String action = "com.google.codelabs.appauth.HANDLE_AUTHORIZATION_RESPONSE";
-        Intent postAuthorizationIntent = new Intent(action);
-        PendingIntent pendingIntent = PendingIntent.getActivity(view.getContext(), request.hashCode(), postAuthorizationIntent, 0);
-        authorizationService.performAuthorizationRequest(request, pendingIntent);
+            String action = "com.google.codelabs.appauth.HANDLE_AUTHORIZATION_RESPONSE";
+            Intent postAuthorizationIntent = new Intent(action);
+            PendingIntent pendingIntent = PendingIntent.getActivity(view.getContext(), request.hashCode(), postAuthorizationIntent, 0);
+            authorizationService.performAuthorizationRequest(request, pendingIntent);
+        });
+        tmp.start();
+
 
 
 
     }
 
-
+    public void onClick() {
+        Intent intent = new Intent(MainActivity.this, maid_home_screen.class);
+        startActivity(intent);
+    }
     @Override
     protected void onNewIntent(Intent intent) {
         checkIntent(intent);
@@ -238,7 +251,15 @@ public class MainActivity extends AppCompatActivity {
                         if (tokenResponse != null) {
                             authState.update(tokenResponse, exception);
                             persistAuthState(authState);
-                            Log.i(LOG_TAG, String.format("Token Response [ Access Token: %s, ID Token: %s ]", tokenResponse.accessToken, tokenResponse.idToken));
+                            download_files tmp  = download_files.get_server_down();
+                            Map<String, String> logins = new HashMap<String, String>();
+                            logins.put("accounts.google.com", tokenResponse.idToken);
+                            tmp.s3credentialsProvider(logins);
+                            db_cordinator tmp2 = db_cordinator.getInstance(holder);
+                            tmp2.set_token(logins);
+                            aws_cognito t = new aws_cognito();
+                            t.set_token(logins);
+                            t.sign_in(holder);
                         }
                     }
                 }
@@ -256,96 +277,35 @@ public class MainActivity extends AppCompatActivity {
     private void enablePostAuthorizationFlows() {
         mAuthState = restoreAuthState();
         if (mAuthState != null && mAuthState.isAuthorized()) {
-            if (mMakeApiCall.getVisibility() == View.GONE) {
+           /* if (mMakeApiCall.getVisibility() == View.GONE) {
                 mMakeApiCall.setVisibility(View.VISIBLE);
                 mMakeApiCall.setOnClickListener(new MakeApiCallListener(this, mAuthState, new AuthorizationService(this)));
             }
             if (mSignOut.getVisibility() == View.GONE) {
                 mSignOut.setVisibility(View.VISIBLE);
                 mSignOut.setOnClickListener(new SignOutListener(this));
-            }
+            }*/
         } else {
-            mMakeApiCall.setVisibility(View.GONE);
-            mSignOut.setVisibility(View.GONE);
+            /*mMakeApiCall.setVisibility(View.GONE);
+            mSignOut.setVisibility(View.GONE);*/
         }
     }
 
-    public static class MakeApiCallListener implements Button.OnClickListener {
-
-        private final MainActivity mMainActivity;
-        private AuthState mAuthState;
-        private AuthorizationService mAuthorizationService;
-
-        public MakeApiCallListener(@NonNull MainActivity mainActivity, @NonNull AuthState authState, @NonNull AuthorizationService authorizationService) {
-            mMainActivity = mainActivity;
-            mAuthState = authState;
-            mAuthorizationService = authorizationService;
+    @Nullable
+    private AuthState restoreAuthState() {
+        String jsonString = getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .getString(AUTH_STATE, null);
+        if (!TextUtils.isEmpty(jsonString)) {
+            try {
+                return AuthState.fromJson(jsonString);
+            } catch (JSONException jsonException) {
+                // should never happen
+            }
         }
-
-        @Override
-        public void onClick(View view) {
-            mAuthState.performActionWithFreshTokens(mAuthorizationService, new AuthState.AuthStateAction() {
-                @Override
-                public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException exception) {
-                    new AsyncTask<String, Void, JSONObject>() {
-                        @Override
-                        protected JSONObject doInBackground(String... tokens) {
-                            OkHttpClient client = new OkHttpClient();
-                            String LOG_TAG = "new stuff line 290";
-                            okhttp3.Request request = new Request.Builder()
-                                    .url("https://www.googleapis.com/oauth2/v3/userinfo")
-                                    .addHeader("Authorization", String.format("Bearer %s", tokens[0]))
-                                    .build();
-
-                            try {
-                                Response response = client.newCall(request).execute();
-                                String jsonBody = response.body().string();
-                                Log.i(LOG_TAG, String.format("User Info Response %s", jsonBody));
-                                return new JSONObject(jsonBody);
-                            } catch (Exception exception) {
-                                Log.w(LOG_TAG, exception);
-                            }
-                            return null;
-                        }
-
-                        @Override
-                        protected void onPostExecute(JSONObject userInfo) {
-                            if (userInfo != null) {
-                                String fullName = userInfo.optString("name", null);
-                                String givenName = userInfo.optString("given_name", null);
-                                String familyName = userInfo.optString("family_name", null);
-                                String imageUrl = userInfo.optString("picture", null);
-                                if (!TextUtils.isEmpty(imageUrl)) {
-                                    Picasso.with(mMainActivity)
-                                            .load(imageUrl)
-                                            .placeholder(R.drawable.common_google_signin_btn_icon_dark)
-                                            .into(mMainActivity.mProfileView);
-                                }
-                                if (!TextUtils.isEmpty(fullName)) {
-                                    mMainActivity.mFullName.setText(fullName);
-                                }
-                                if (!TextUtils.isEmpty(givenName)) {
-                                    mMainActivity.mGivenName.setText(givenName);
-                                }
-                                if (!TextUtils.isEmpty(familyName)) {
-                                    mMainActivity.mFamilyName.setText(familyName);
-                                }
-
-                                String message;
-                                if (userInfo.has("error")) {
-                                    message = String.format("%s [%s]", mMainActivity.getString(R.string.request_failed), userInfo.optString("error_description", "No description"));
-                                } else {
-                                    message = mMainActivity.getString(R.string.request_complete);
-                                }
-                                Snackbar.make(mMainActivity.mProfileView, message, Snackbar.LENGTH_SHORT)
-                                        .show();
-                            }
-                        }
-                    }.execute(accessToken);
-                }
-            });
-        }
+        return null;
     }
+
+
 }
 
  class OnTokenAcquired implements AccountManagerCallback<Bundle> {

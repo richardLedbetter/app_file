@@ -39,7 +39,7 @@ public class see_past_data extends AppCompatActivity {
         downlink.set_room("past");
         downlink.vals.set_file_path();
         downlink.setScreen(this);
-        downlink.s3credentialsProvider();
+        //downlink.s3credentialsProvider();
         downlink.setTransferUtility();
         Log.d("see_past_data", downlink.vals.file_path);
         downlink.vals.get_folder();

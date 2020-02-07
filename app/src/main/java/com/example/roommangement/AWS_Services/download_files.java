@@ -7,10 +7,14 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.auth.CognitoCredentialsProvider;
+
+import com.amazonaws.auth.IdentityChangedListener;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentity;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -23,6 +27,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class download_files {
 
@@ -121,10 +126,9 @@ public class download_files {
     public void set_room(String Room){
         vals.Hotel_room = Room;
     }
-
     public void s3credentialsProvider(){
 
-
+        Log.d("ran", "s3credentialsProvider: ");
 
         // Initialize the AWS Credential
         CognitoCachingCredentialsProvider cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
@@ -132,7 +136,39 @@ public class download_files {
                 vals.pool, // Identity Pool ID
                 Regions.US_WEST_2 // Region
         );
+        //cognitoCachingCredentialsProvider.setLogins();
         setAmazonS3Client(cognitoCachingCredentialsProvider);
+    }
+
+    public void s3credentialsProvider(Map token){
+
+        CognitoCachingCredentialsProvider cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
+                vals.screen, // get the context for the current activity
+                "231867092748", // your AWS Account id
+                vals.pool, // your identity pool id
+                "arn:aws:iam::231867092748:role/Cognito_test_hotelUnauth_Role",// an authenticated role ARN
+                "arn:aws:iam::231867092748:role/Cognito_test_hotelAuth_Role", // an unauthenticated role ARN
+                Regions.US_WEST_2 //Region
+        );
+
+        // Initialize the AWS Credential
+        /*CognitoCachingCredentialsProvider cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
+                vals.screen,
+                vals.pool, // Identity Pool ID
+                Regions.US_WEST_2 // Region
+        );*/
+        Log.d("logged in", "s3credentialsProvider: ");
+
+        cognitoCachingCredentialsProvider.setLogins(token);
+        cognitoCachingCredentialsProvider.registerIdentityChangedListener(new IdentityChangedListener() {
+            @Override
+            public void identityChanged(String oldIdentityId, String newIdentityId) {
+                Log.d("stuffs", "identityChanged: ");
+            }
+        });
+
+        setAmazonS3Client(cognitoCachingCredentialsProvider);
+
     }
 
 
@@ -141,9 +177,9 @@ public class download_files {
 
         // Create an S3 client
         vals.s3Client = new AmazonS3Client(credentialsProvider);
-
         // Set the region of your S3 bucket
         vals.s3Client.setRegion(Region.getRegion(Regions.US_WEST_1));
+
     }
 
     public void setTransferUtility(){
