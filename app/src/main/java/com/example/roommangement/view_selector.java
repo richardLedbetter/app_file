@@ -2,16 +2,20 @@ package com.example.roommangement;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
+import com.example.roommangement.AWS_Cognito.aws_cognito;
 import com.example.roommangement.global_vars.auths;
 
 public class view_selector extends AppCompatActivity {
 
-    ScrollView page;
+    LinearLayout page;
     int Hotels =1;
     auths auth_lvl;
 
@@ -19,15 +23,17 @@ public class view_selector extends AppCompatActivity {
     int dpHeight;
     int dpwidth;
 
+    aws_cognito creds;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_selector);
-        page = findViewById(R.id.scroll);
+        page = findViewById(R.id.selector_page);
         auth_lvl = auths.get_auth();
-
-
-
+        creds = aws_cognito.getInstance();
+        Hotels = 1;//auth_lvl.get_Hotel();
+        setup();
     }
 
     public void setup(){
@@ -40,10 +46,16 @@ public class view_selector extends AppCompatActivity {
         dpwidth = (int) (displayMetrics.widthPixels);
         dpHeight = (int) (displayMetrics.heightPixels );
 
-        Button lvl_1 = findViewById(R.id.maid);
-        Button lvl_2 = findViewById(R.id.maintence);
-        Button lvl_3 = findViewById(R.id.owner);
+        Button lvl_1 = new Button(this);
+        Button lvl_2 = new Button(this);
+        Button lvl_3 = new Button(this);
 
+        lvl_1.setText("MAID LOG-IN");
+        lvl_1.setTextSize(40);
+        lvl_2.setText("MAINTENANCE LOG-IN");
+        lvl_2.setTextSize(40);
+        lvl_3.setText("MANAGER LOG-IN");
+        lvl_3.setTextSize(40);
         lvl_1.setOnClickListener(v1->{
             auth_lvl.auth_lvl = 1;
             onClick();
@@ -65,9 +77,13 @@ public class view_selector extends AppCompatActivity {
         lvl_3.setWidth(dpwidth);
         lvl_3.setHeight(dpHeight/5);
         page.addView(lvl_3);
+
+        String TAG = "made it";
+        Log.d(TAG, "onClick_Hotel: ");
     }
 
     public void onClick(){
-
+        Intent intent = new Intent(view_selector.this, maid_home_screen.class);
+        startActivity(intent);
     }
 }

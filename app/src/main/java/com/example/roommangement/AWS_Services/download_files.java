@@ -151,12 +151,6 @@ public class download_files {
                 Regions.US_WEST_2 //Region
         );
 
-        // Initialize the AWS Credential
-        /*CognitoCachingCredentialsProvider cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
-                vals.screen,
-                vals.pool, // Identity Pool ID
-                Regions.US_WEST_2 // Region
-        );*/
         Log.d("logged in", "s3credentialsProvider: ");
 
         cognitoCachingCredentialsProvider.setLogins(token);

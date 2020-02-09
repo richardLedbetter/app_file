@@ -26,11 +26,14 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.File;
 
@@ -74,6 +77,7 @@ import net.openid.appauth.TokenResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -121,14 +125,34 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //
 
+        displayMetrics = this.getResources().getDisplayMetrics();
+        dpwidth = (int) (displayMetrics.widthPixels);
+        dpHeight = (int) (displayMetrics.heightPixels );
+        //
+       // ProgressBar pgsBar;
         String TAG = "GOOGLE";
         Intent intent = getIntent();
         if(intent!=null){
+            Log.d(TAG, "onCreate: not null");
             Thread ta = new Thread(()->{
                 try{
                     handleAuthorizationResponse(intent);
+                    Button x = findViewById(R.id.GOOGLE_BTN);
+                    x.setVisibility(View.INVISIBLE);
+
+                    ProgressBar pgsBar = findViewById(R.id.pBar);
+                    TextView words = findViewById(R.id.log);
+                    words.setVisibility(View.VISIBLE);
+                    words.setText("Logining in");
+                    words.setTextSize(40);
+                    words.setX((dpwidth-200)/2);
+                    words.setY((dpHeight-73)/3);
+                    Log.d(TAG, Float.toString((dpwidth-pgsBar.getWidth())/2));
+                    pgsBar.setX((dpwidth-77)/2);
+                    pgsBar.setY((dpHeight-73)/2);
+                    pgsBar.setVisibility(View.VISIBLE);
+
                 }catch (Exception e){
                     Log.d(TAG, "onCreate: broken");
                 }
@@ -153,26 +177,7 @@ public class MainActivity extends AppCompatActivity {
         auths auth_lvl = auths.get_auth();
 
 
-        displayMetrics = this.getResources().getDisplayMetrics();
-        dpwidth = (int) (displayMetrics.widthPixels);
-        dpHeight = (int) (displayMetrics.heightPixels );
 
-        Button lvl_1 = findViewById(R.id.maid);
-        Button lvl_2 = findViewById(R.id.maintence);
-        Button lvl_3 = findViewById(R.id.owner);
-
-        lvl_1.setOnClickListener(v1->{
-            auth_lvl.auth_lvl = 1;
-            onClick();
-        });
-        lvl_2.setOnClickListener(v1->{
-            auth_lvl.auth_lvl = 2;
-            onClick();
-        });
-        lvl_3.setOnClickListener(v1->{
-            auth_lvl.auth_lvl = 3;
-            onClick();
-        });
 
     }
 
@@ -203,14 +208,10 @@ public class MainActivity extends AppCompatActivity {
             authorizationService.performAuthorizationRequest(request, pendingIntent);
         });
         tmp.start();
-
-
-
-
     }
 
     public void onClick() {
-        Intent intent = new Intent(MainActivity.this, maid_home_screen.class);
+        Intent intent = new Intent(MainActivity.this, view_selector.class);
         startActivity(intent);
     }
     @Override
@@ -234,6 +235,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    //stuff happens here
     private void handleAuthorizationResponse(@NonNull Intent intent) {
         String LOG_TAG = "new copied stuff";
         AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
@@ -251,15 +254,27 @@ public class MainActivity extends AppCompatActivity {
                         if (tokenResponse != null) {
                             authState.update(tokenResponse, exception);
                             persistAuthState(authState);
-                            download_files tmp  = download_files.get_server_down();
+
                             Map<String, String> logins = new HashMap<String, String>();
                             logins.put("accounts.google.com", tokenResponse.idToken);
-                            tmp.s3credentialsProvider(logins);
-                            db_cordinator tmp2 = db_cordinator.getInstance(holder);
-                            tmp2.set_token(logins);
-                            aws_cognito t = new aws_cognito();
-                            t.set_token(logins);
-                            t.sign_in(holder);
+                            Thread task1 = new Thread(()->{
+                                download_files tmp  = download_files.get_server_down();
+                                tmp.s3credentialsProvider(logins);
+
+
+                                db_cordinator tmp2 = db_cordinator.getInstance(holder);
+                                tmp2.set_token(logins);
+                            });
+                            Thread task2 = new Thread(()->{
+                                aws_cognito t = new aws_cognito();
+                                t.set_token(logins);
+                                t.set_screen(holder);
+                                t.sign_in(holder);
+                            });
+                            task2.start();
+                            task1.start();
+
+                            onClick();
                         }
                     }
                 }

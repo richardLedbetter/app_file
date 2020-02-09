@@ -48,12 +48,6 @@ public class maid_home_screen extends AppCompatActivity {
         setContentView(R.layout.activity_maid_home_screen);
         ll =  (LinearLayout)(findViewById(R.id.ll));
         set_up();
-        /*Runnable update_screen = ()-> {
-            other_stuff();
-        };
-        task2 = new Thread(update_screen);
-       task2.start();*/
-
 
         pullToRefresh = (SwipeRefreshLayout)findViewById(R.id.sprit);
         Log.d("MS1", Integer.toString(pullToRefresh.getWidth()));
@@ -158,17 +152,15 @@ public class maid_home_screen extends AppCompatActivity {
     public List<Document> onSaveClicked() {
         String TAG = "database:";
         Document memo = new Document();
+        table.set_Table_name("test_sample");
         try{
             table.load_table();
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        downlink.setScreen(this);
-       // downlink.s3credentialsProvider();
-        downlink.setTransferUtility();
         List<Document> test = table.getAllMemos();
-        Log.d(TAG, test.get(0).toString());
+        //Log.d(TAG, test.get(0).toString());
         return test;
     }
 

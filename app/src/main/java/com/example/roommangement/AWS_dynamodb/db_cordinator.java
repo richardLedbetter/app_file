@@ -49,15 +49,36 @@ public class db_cordinator {
         return base;
     }
     //cred info
+    cordinator vals = cordinator.get_orchestrate();
     Context screen;
+
+    //Pool info
     String Pool = "us-west-2:e4f1669c-a472-43e4-8fc2-73de20022289";
+    public void set_Pool(String nPool){
+       vals.set_pool(nPool);
+    }
+    public String get_Pool(){
+        return vals.pool;
+    }
+
     Regions Region = Regions.US_WEST_2;// Voodoo magic its the wrong region but works
-    String Table_name = "test_sample";
     public Document Doc = new Document();
+
+
+    String Table_name = "test_sample";
+    public void set_Table_name(String t){
+        Table_name = t;
+    }
+    public String get_Table_name(){
+        return Table_name;
+    }
+
+
     //working tools
     private Table curr_table;
     AmazonDynamoDBClient table_client;
     public Map token;
+
 
     CognitoCachingCredentialsProvider creds;
     // Create a new credentials provider
@@ -67,19 +88,15 @@ public class db_cordinator {
     public void load_table(){
         String TAG = "p";
         download_files downlink = download_files.get_server_down();
+        vals.set_pool("us-west-2:e4f1669c-a472-43e4-8fc2-73de20022289");
          creds = new CognitoCachingCredentialsProvider(
-                downlink.vals.screen, // get the context for the current activity
+                vals.screen, // get the context for the current activity
                 "231867092748", // your AWS Account id
-                downlink.vals.pool, // your identity pool id
+                vals.pool, // your identity pool id
                 "arn:aws:iam::231867092748:role/Cognito_test_hotelUnauth_Role",// an authenticated role ARN
                 "arn:aws:iam::231867092748:role/Cognito_test_hotelAuth_Role", // an unauthenticated role ARN
                 Regions.US_WEST_2 //Region
         );
-        /*creds = new CognitoCachingCredentialsProvider(
-                screen,
-                Pool,
-                Region);*/
-            // Create a connection to DynamoDB
         creds.setLogins(token);
         table_client= new AmazonDynamoDBClient(creds);
         table_client.setRegion(com.amazonaws.regions.Region.getRegion(Regions.US_WEST_1));
@@ -109,7 +126,6 @@ public class db_cordinator {
         Document document = curr_table.updateItem(memo, new UpdateItemOperationConfig().withReturnValues(ReturnValue.UPDATED_NEW));
         Log.d("updated", document.toString());
     }
-
     /**
      * Delete an existing memo in the database
      * @param memo the memo to delete
@@ -119,20 +135,17 @@ public class db_cordinator {
                 memo.get("userId").asPrimitive(),   // The Partition Key
                 memo.get("noteId").asPrimitive());  // The Hash Key
     }
-
     /**
      * Retrieve a memo by noteId from the database
      * @param noteId the ID of the note
      * @return the related document
      */
     public Document getMemoById(String noteId) {
-        return curr_table.getItem(new Primitive(noteId),new Primitive(creds.getCachedIdentityId()) );
+        return curr_table.getItem(new Primitive(noteId));
     }
-
     public Document getMemoById(int noteId) {
         return curr_table.getItem(new Primitive(noteId));
     }
-
     /**
      * Retrieve all the memos from the database
      * @return the list of memos
