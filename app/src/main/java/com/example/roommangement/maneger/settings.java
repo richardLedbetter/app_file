@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.example.roommangement.AWS_Services.download_files;
@@ -29,10 +32,39 @@ public class settings extends AppCompatActivity {
     db_cordinator table = db_cordinator.getInstance(this);
     upload_files uploader = upload_files.get_loader();
 
+    DisplayMetrics displayMetrics;
+    int dpHeight;
+    int dpwidth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        displayMetrics = this.getResources().getDisplayMetrics();
+        dpwidth = (int) (displayMetrics.widthPixels);
+        dpHeight = (int) (displayMetrics.heightPixels );
+
+        LinearLayout page = findViewById(R.id.page);
+
+        Button t = new Button(this);
+        t.setWidth(dpwidth);
+        t.setText("See past data");
+        t.setTextSize(40);
+        t.setOnClickListener(v1->{
+            see_past_data();
+        });
+        page.addView(t);
+
+
+        Button t2 = new Button(this);
+        t2.setWidth(dpwidth);
+        t2.setText("Unclean all Rooms");
+        t2.setTextSize(40);
+        t2.setOnClickListener(v1->{
+            unclean_all_rooms();
+        });
+        page.addView(t2);
 
     }
     public List<Document> onSaveClicked() {
@@ -52,7 +84,7 @@ public class settings extends AppCompatActivity {
             Log.d(TAG, test.get(0).toString());
         return test;
     }
-    public void unclean_all_rooms(View view){
+    public void unclean_all_rooms(){
         Thread task2 = new Thread(()->{
             uploader.vals.set_Hotel_name("room-check-test");
             uploader.vals.set_Hotel_floor("past");
@@ -118,7 +150,7 @@ public class settings extends AppCompatActivity {
         finish();
     }
 
-    public void see_past_data(View view){
+    public void see_past_data(){
         Intent intent = new Intent(settings.this,see_past_data.class);
         startActivity(intent);
 
