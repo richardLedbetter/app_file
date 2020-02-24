@@ -132,8 +132,11 @@ public class download_files {
 
         // Initialize the AWS Credential
         CognitoCachingCredentialsProvider cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
-                vals.screen,
+                vals.screen, // Context
+                "231867092748",
                 vals.pool, // Identity Pool ID
+                "arn:aws:iam::231867092748:role/Cognito_test_hotelUnauth_Role",// an authenticated role ARN
+                "arn:aws:iam::231867092748:role/Cognito_test_hotelAuth_Role",
                 Regions.US_WEST_2 // Region
         );
         //cognitoCachingCredentialsProvider.setLogins();

@@ -6,27 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".maneger.settings">
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="176dp"
-        android:layout_height="138dp"
-        android:layout_marginStart="116dp"
-        android:layout_marginLeft="116dp"
-        android:layout_marginTop="96dp"
-        android:onClick="unclean_all_rooms"
-        android:text="Unclean all Rooms"
+    <LinearLayout
+        android:id="@+id/page"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="214dp"
-        android:layout_height="194dp"
-        android:layout_marginStart="98dp"
-        android:layout_marginLeft="98dp"
-        android:layout_marginBottom="196dp"
-        android:onClick="see_past_data"
-        android:text="See past data"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

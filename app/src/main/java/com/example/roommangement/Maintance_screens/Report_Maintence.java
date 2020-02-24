@@ -18,7 +18,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.GridLayout;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.example.roommangement.AWS_Services.upload_files;
@@ -52,6 +55,7 @@ public class Report_Maintence extends AppCompatActivity {
     //files
     File photo;
     File discription;
+    String [] issue_name  ={"Shower","Toilet","Sink","Ded","Night stand","TV","AC","Desk","Window"};
 
 
     //Camera
@@ -70,29 +74,39 @@ public class Report_Maintence extends AppCompatActivity {
         setContentView(R.layout.activity_report_maintence);
         Room = getIntent().getIntExtra("Room_num",-1);
         issue_num = getIntent().getIntExtra("issue_num",0);
+
+        //display measurements
         displayMetrics = this.getResources().getDisplayMetrics();
         dpwidth = (int) (displayMetrics.widthPixels);
         dpHeight = (int) (displayMetrics.heightPixels );
-        set_up();
+        area();
+        //set_up();
     }
 
     public void set_up(){
-
+        //Camera setup
         camera = Camera.open();
         showCamera = new photo(this, camera);
+
+        //f
         frameLayout = (FrameLayout) findViewById(R.id.takePhoto);
         dpHeight = (int) (displayMetrics.heightPixels);
         dpwidth= (int) (displayMetrics.widthPixels);
         frameLayout.setLayoutParams( new ConstraintLayout.LayoutParams(dpwidth,(int)(dpHeight*.8)));
         frameLayout.addView(showCamera);
+
+        //PHOTO BUTTON
         b = findViewById(R.id.photo_btn);
-        //b.setTextColor(Color.BLUE);
         b.setText("Take Photo");
         b.setTextSize(30);
         b.setOnClickListener(this::photo_button);
         b.setLayoutParams(new ConstraintLayout.LayoutParams(dpwidth,(int)(dpHeight*.2)));
-        b.setY((int)(displayMetrics.heightPixels*.8));
-        b.setX((int)(0));
+        dpHeight = (int) (displayMetrics.heightPixels);
+        dpwidth= (int) (displayMetrics.widthPixels);
+        Log.d("screen size", Integer.toString(dpHeight));
+        dpHeight = (int) (displayMetrics.heightPixels);
+        b.setY((int)(dpHeight+20));
+        b.setX((int)(dpwidth));
     }
 
     public void report_issues(View view){
@@ -102,6 +116,7 @@ public class Report_Maintence extends AppCompatActivity {
         uploader.vals.set_issue_path(Long.toString(System.currentTimeMillis())+".jpg");
         uploader.set_file(photo);
         uploader.vals.transferObserverListener("upload");
+
         try {
             photo = File.createTempFile("discription", ".txt");
         } catch (IOException e) {
@@ -113,6 +128,7 @@ public class Report_Maintence extends AppCompatActivity {
             table.update(builder);
 
         };
+
         Thread task1 = new Thread(r);
         task1.start();
         Editable tmp = input.getText();
@@ -129,10 +145,32 @@ public class Report_Maintence extends AppCompatActivity {
             Log.d("things went wrong", "uploadFileToS3: ");
             e.printStackTrace();
         }
+
         uploader.vals.set_issue_path(Long.toString(System.currentTimeMillis())+".txt");
         uploader.set_file(photo);
         uploader.vals.transferObserverListener("upload");
         finish();
+    }
+
+
+    public void area(){
+        GridLayout t = findViewById(R.id.problems);
+        int catigories = 9;
+
+        for(int i=0;i<issue_name.length;i++){
+            Button tmp = new Button(this);
+            tmp.setText(issue_name[i]);
+            tmp.setWidth(200);
+            tmp.setHeight(250);
+            tmp.setOnClickListener(v1->{
+                t.removeAllViews();
+                t.setVisibility(View.GONE);
+                ConstraintLayout tmp2 = findViewById(R.id.palet);
+                tmp2.removeView(t);
+                set_up();
+            });
+            t.addView(tmp,i);
+        }
     }
 
 

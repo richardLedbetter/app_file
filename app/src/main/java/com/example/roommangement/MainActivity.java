@@ -77,7 +77,6 @@ import net.openid.appauth.TokenResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -94,30 +93,19 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    File file_2_upload =   new File("");
-    upload_files uplink;
-    download_files downlink = new download_files();
-    String curr_path;
-    GoogleSignInClient log_in;
+    //Display values
     DisplayMetrics displayMetrics;
     int dpHeight;
     int dpwidth;
 
-
+    //log-in variables
     AuthState mAuthState;
     private static final String SHARED_PREFERENCES_NAME = "AuthStatePreference";
     private static final String AUTH_STATE = "AUTH_STATE";
     private static final String USED_INTENT = "USED_INTENT";
-    private static final String LOGIN_HINT = "login_hint";
     AuthorizationServiceConfiguration serviceConfiguration;
 
-    AppCompatButton mAuthorize;
-    AppCompatButton mMakeApiCall;
-    AppCompatButton mSignOut;
-    AppCompatTextView mGivenName;
-    AppCompatTextView mFamilyName;
-    AppCompatTextView mFullName;
-    ImageView mProfileView;
+    //Global Context
     Context holder = this;
 
     @Override
@@ -125,11 +113,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        //Metrics for displaying on screen XML
         displayMetrics = this.getResources().getDisplayMetrics();
         dpwidth = (int) (displayMetrics.widthPixels);
         dpHeight = (int) (displayMetrics.heightPixels );
-        //
+
+
        // ProgressBar pgsBar;
         String TAG = "GOOGLE";
         Intent intent = getIntent();
@@ -137,24 +126,28 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: not null");
             Thread ta = new Thread(()->{
                 try{
+                    //checks to see if user has signed in
                     handleAuthorizationResponse(intent);
+
+                    //hide log-in button
                     Button x = findViewById(R.id.GOOGLE_BTN);
                     x.setVisibility(View.INVISIBLE);
 
+                    //loading circle
                     ProgressBar pgsBar = findViewById(R.id.pBar);
-                    TextView words = findViewById(R.id.log);
-                    words.setVisibility(View.VISIBLE);
-                    words.setText("Logining in");
-                    words.setTextSize(40);
-                    words.setX((dpwidth-200)/2);
-                    words.setY((dpHeight-73)/3);
-                    Log.d(TAG, Float.toString((dpwidth-pgsBar.getWidth())/2));
                     pgsBar.setX((dpwidth-77)/2);
                     pgsBar.setY((dpHeight-73)/2);
                     pgsBar.setVisibility(View.VISIBLE);
 
+                    //display loading
+                    TextView words = findViewById(R.id.log);
+                    words.setVisibility(View.VISIBLE);
+                    words.setText("Loging in");
+                    words.setTextSize(40);
+                    words.setX((dpwidth-200)/2);
+                    words.setY((dpHeight-73)/3);
                 }catch (Exception e){
-                    Log.d(TAG, "onCreate: broken");
+                    Log.d(TAG, "not logged in");
                 }
                 
             });
@@ -163,32 +156,26 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Add a call to initialize AWSMobileClient
-
         serviceConfiguration = new AuthorizationServiceConfiguration(
                 Uri.parse("https://accounts.google.com/o/oauth2/v2/auth") /* auth endpoint */,
                 Uri.parse("https://www.googleapis.com/oauth2/v4/token") /* token endpoint */
         );
         Log.d("view", "onCreate: ");
 
-// Add the request to the RequestQueue.
-
-        uplink = new upload_files();
-        uplink.setScreen(this);
-        auths auth_lvl = auths.get_auth();
-
-
-
-
     }
 
 
-    public void google_log_in(View view){
+    public void google_log_in(View view){//log-in including O-auth sign-in
+
         //https://codelabs.developers.google.com/codelabs/appauth-android-codelab/#5
         Thread tmp = new Thread(()->{
-            Log.d("working", "google_log_in: ");
+            //google api info
             String clientId = "742932088080-l4ve9odnp9j10gd65hectcks1vktbvra.apps.googleusercontent.com";
             String url="com.example.roommangement%3A/oauth2redirect";
             Uri redirectUri = Uri.parse("com.example.roommangement:/oauth2callback");
+            //end google api info
+
+            //build
             AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
                     serviceConfiguration,
                     clientId,
@@ -198,10 +185,8 @@ public class MainActivity extends AppCompatActivity {
             builder.setScopes("profile");
             AuthorizationRequest request = builder.build();
 
-
             //https://codelabs.developers.google.com/codelabs/appauth-android-codelab/#6
             AuthorizationService authorizationService = new AuthorizationService(view.getContext());
-
             String action = "com.google.codelabs.appauth.HANDLE_AUTHORIZATION_RESPONSE";
             Intent postAuthorizationIntent = new Intent(action);
             PendingIntent pendingIntent = PendingIntent.getActivity(view.getContext(), request.hashCode(), postAuthorizationIntent, 0);
@@ -235,8 +220,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     //stuff happens here
+    //sets up auth for tables and Cognito
     private void handleAuthorizationResponse(@NonNull Intent intent) {
         String LOG_TAG = "new copied stuff";
         AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
@@ -259,21 +244,22 @@ public class MainActivity extends AppCompatActivity {
                             logins.put("accounts.google.com", tokenResponse.idToken);
                             Thread task1 = new Thread(()->{
                                 download_files tmp  = download_files.get_server_down();
+                                tmp.setScreen(holder);
                                 tmp.s3credentialsProvider(logins);
-
 
                                 db_cordinator tmp2 = db_cordinator.getInstance(holder);
                                 tmp2.set_token(logins);
                             });
                             Thread task2 = new Thread(()->{
-                                aws_cognito t = new aws_cognito();
+                                aws_cognito t = aws_cognito.getInstance();
                                 t.set_token(logins);
                                 t.set_screen(holder);
                                 t.sign_in(holder);
                             });
                             task2.start();
                             task1.start();
-
+                            String TAG = "line 269";
+                            Log.d(TAG, "onTokenRequestCompleted: ");
                             onClick();
                         }
                     }
@@ -323,25 +309,5 @@ public class MainActivity extends AppCompatActivity {
 
 }
 
- class OnTokenAcquired implements AccountManagerCallback<Bundle> {
-    @Override
-    public void run(AccountManagerFuture<Bundle> result) {
-        // Get the result of the operation from the AccountManagerFuture.
-        Bundle bundle = null;
-        try {
-            bundle = result.getResult();
-        } catch (AuthenticatorException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (OperationCanceledException e) {
-            e.printStackTrace();
-        }
 
-        // The token is a named value in the bundle. The name of the value
-        // is stored in the constant AccountManager.KEY_AUTHTOKEN.
-        String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-        Log.d("TOKEN", token);
-    }
-}
 

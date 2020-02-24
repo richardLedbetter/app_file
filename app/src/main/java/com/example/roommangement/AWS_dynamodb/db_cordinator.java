@@ -97,6 +97,7 @@ public class db_cordinator {
                 "arn:aws:iam::231867092748:role/Cognito_test_hotelAuth_Role", // an unauthenticated role ARN
                 Regions.US_WEST_2 //Region
         );
+
         creds.setLogins(token);
         table_client= new AmazonDynamoDBClient(creds);
         table_client.setRegion(com.amazonaws.regions.Region.getRegion(Regions.US_WEST_1));
