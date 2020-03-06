@@ -15,6 +15,7 @@ import com.example.roommangement.AWS_Cognito.aws_cognito;
 import com.example.roommangement.AWS_dynamodb.db_cordinator;
 import com.example.roommangement.global_vars.auths;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,6 +39,11 @@ public class view_selector extends AppCompatActivity {
     aws_cognito creds;
     db_cordinator table;
 
+    LinearLayout curr;
+    int curr_Hotel = -1;
+    int buttons_displayed = 0;
+    JSONObject info = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,10 +57,6 @@ public class view_selector extends AppCompatActivity {
             datebase_int();
         });
         date.start();
-
-       // setup();
-
-
     }
 
     public void datebase_int(){
@@ -65,30 +67,44 @@ public class view_selector extends AppCompatActivity {
         table.set_Table_name("users");
         table.set_token(creds.token);
         table.load_table();
+
         Document row = table.getMemoById(creds.get_ID());
-        JSONObject info = null;
+
         try {
             info = new JSONObject(Document.toJson(row));
             info = info.getJSONObject("hotels");
+            Log.d("returned val:", info.toString());
             Iterator<String> keys = info.keys();
-            for (int i =0;i< info.length(); i++){
-                String Room = keys.next();
-                int auth_lvl = info.getInt(Room);
-                Button tmp_btn = new Button(this);
-                tmp_btn.setWidth(dpwidth);
-                tmp_btn.setHeight(dpHeight/5);
-                tmp_btn.setTextSize(40);
-                tmp_btn.setText(Room+"\n"+auth_lvl);
-                Thread u = new Thread(()->{
-                    page.addView(tmp_btn);
+            if(info.length()==1){
+
+            }else {
+                for (int i = 0; i < info.length(); i++) {
+                    String Room = keys.next();
+                    int auth_lvl_local = info.getInt(Room);
+                    Button tmp_btn = new Button(this);
+                    tmp_btn.setWidth(dpwidth);
+                    tmp_btn.setHeight(dpHeight / 5);
+                    tmp_btn.setTextSize(40);
+                    tmp_btn.setText(Room + "\n" + auth_lvl_local);
+                    tmp_btn.setId(i);
+                    tmp_btn.setOnClickListener(v1 -> {
+                        Remove_Hotels();
+                        if(curr_Hotel!=tmp_btn.getId()) {
+                            onClick_Hotel(tmp_btn.getId(),auth_lvl_local);
+                        }else{
+                            curr_Hotel = -1;
+                        }
+                    });
+                    Thread u = new Thread(() -> {
+                        page.addView(tmp_btn);
+                    });
+                    runOnUiThread(u);
+                }
+                runOnUiThread(() -> {
+                    //  onClick_Hotel();
                 });
-                runOnUiThread(u);
+
             }
-            runOnUiThread(()->{
-                onClick_Hotel();
-            });
-
-
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,7 +121,22 @@ public class view_selector extends AppCompatActivity {
            // onClick_Hotel();
         }
     }
-    public void onClick_Hotel(){
+    public void Remove_Hotels(){
+        if(curr_Hotel==-1){
+            return;
+        }
+        int tmp = curr_Hotel;
+        tmp = tmp+buttons_displayed;
+        while(tmp>curr_Hotel){
+            page.removeViewAt(curr_Hotel+1);
+            tmp--;
+        }
+        buttons_displayed =0;
+
+    }
+    public void onClick_Hotel(int Hotel,int local_auth){
+        curr_Hotel = Hotel;
+
         /*TO-DO
         * Make this hotel specific through drop down menu
         * */
@@ -115,6 +146,7 @@ public class view_selector extends AppCompatActivity {
         dpwidth = (int) (displayMetrics.widthPixels);
         dpHeight = (int) (displayMetrics.heightPixels );
 
+        //auth_lvl.setauth_lvl();
 
         //MAID view button
         Button lvl_1 = new Button(this);
@@ -122,7 +154,11 @@ public class view_selector extends AppCompatActivity {
         lvl_1.setHeight(dpHeight/5);
         lvl_1.setText("MAID LOG-IN");
         lvl_1.setTextSize(40);
-        page.addView(lvl_1);
+        if(local_auth==1||local_auth==3){
+            page.addView(lvl_1,Hotel+1);
+            buttons_displayed++;
+        }
+
         lvl_1.setOnClickListener(v1->{
             auth_lvl.auth_lvl = 1;
             onClick();
@@ -138,7 +174,11 @@ public class view_selector extends AppCompatActivity {
         });
         lvl_2.setWidth(dpwidth);
         lvl_2.setHeight(dpHeight/5);
-        page.addView(lvl_2);
+        if(local_auth>1){
+            page.addView(lvl_2,Hotel+2);
+            buttons_displayed++;
+        }
+
 
 
         //MANAGER view button
@@ -151,7 +191,11 @@ public class view_selector extends AppCompatActivity {
         });
         lvl_3.setWidth(dpwidth);
         lvl_3.setHeight(dpHeight/5);
-        page.addView(lvl_3);
+        if(local_auth==3){
+            page.addView(lvl_3,Hotel+3);
+            buttons_displayed++;
+        }
+
     }
     public void onClick(){
         Intent intent = new Intent(view_selector.this, maid_home_screen.class);

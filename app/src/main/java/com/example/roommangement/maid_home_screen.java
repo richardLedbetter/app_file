@@ -164,13 +164,7 @@ public class maid_home_screen extends AppCompatActivity {
         return test;
     }
 
-    public void Room_select(int room_num){
-        Intent intent = new Intent(maid_home_screen.this, room_options_maid.class);
-       // Log.d("Room_number is:", Integer.toString(room_num));
-        intent.putExtra("Room_num",room_num);
 
-        startActivity(intent);
-    }
 
     public void showRoom(List<Document> rooms_table,int floor){
 
@@ -181,7 +175,9 @@ public class maid_home_screen extends AppCompatActivity {
         for (int i =0; i<rooms_table.size(); i++){
             int room_floor = 0;
             try {
+                String TAG = "Room";
                 sample_room = new JSONObject(rooms_table.get(i).toString());
+                //Log.d(TAG, sample_room.toString());
                 issue_num = Integer.parseInt(sample_room.
                         getJSONObject("maintence_issues")
                         .getString("value"));
@@ -237,9 +233,21 @@ public class maid_home_screen extends AppCompatActivity {
     }
 
 
+    public void Room_select(int room_num){
+        Intent intent = new Intent(maid_home_screen.this, room_options_maid.class);
+        // Log.d("Room_number is:", Integer.toString(room_num));
+        intent.putExtra("Room_num",room_num);
+
+        startActivity(intent);
+    }
 
     public void other_stuff(int floor){
         List<Document> rooms_table = onSaveClicked();
+        String TAG = "ROOM:";
+        for (int i =0;i<rooms_table.size();i++){
+            Log.d(TAG, rooms_table.get(i).toString());
+        }
+
         rooms_table = sorter(rooms_table);
 
 
@@ -254,7 +262,7 @@ public class maid_home_screen extends AppCompatActivity {
 
         int num_rooms = 0;
         //Button btnTag;
-        String TAG = "ran";
+       // String TAG = "ran";
 
 
 
@@ -268,55 +276,7 @@ public class maid_home_screen extends AppCompatActivity {
 
 
 
-    /*
-        int size = 50;
-        //Log.d("TAG", sts.toString());
-        int room_numbers = 0;
-        try {
-            room_numbers = message.getInt("total_rooms");
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        for(int i =1;i<=room_numbers;i++){
-
-            try {
-                sts = message.getJSONObject(Integer.toString(i));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            btnTag.setTextSize(28);
-
-            try {
-                room_sts = sts.getString("room_status");
-                cleaned_by = sts.getString("employee_name");
-                room_num = sts.getInt("room_num");
-                rep_prob = sts.getString("num_room_issues");
-                Log.d("room", info.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            btnTag.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-            int tmp = 100+i;
-            btnTag.setText("Room " + room_num+'\n'+room_sts+'\n'+cleaned_by+'\n'+info+'\n'+"maintenance issues:"+rep_prob);
-            btnTag.setId(i);
-            btnTag.setWidth(99999);
-            btnTag.setHeight(200);
-            //ON CLICK LISTENER
-            btnTag.setOnClickListener(v1 -> {
-                Log.d("room clicked", Integer.toString(btnTag.getId()));
-                //get_room_info(tmp);
-                task2.interrupt();
-                int t = tmp;
-                Room_select(t);
-            });
-            //Runnable add = ()->{ll.addView(btnTag);};
-*/
-
-
-            //((Button) findViewById(i)).setOnClickListener(this);
-        //}
     }
 
     public List<Document> sorter(List<Document> rooms){

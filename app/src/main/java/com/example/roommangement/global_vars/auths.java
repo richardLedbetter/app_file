@@ -17,6 +17,9 @@ public void set_username(String t){
 public String get_username(){
     return username;
 }
+public void setauth_lvl(int l){
+    auth_lvl = l;
+}
 public static auths get_auth(){
     if(o ==null){
         o = new auths();

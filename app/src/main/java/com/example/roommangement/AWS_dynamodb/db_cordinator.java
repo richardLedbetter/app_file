@@ -154,8 +154,6 @@ public class db_cordinator {
     public List<Document> getAllMemos() {
         String TAG = "Expression";
         Expression params = new Expression();
-
-
         //params.setExpressionStatement("room_num > :val");
         //params.withExpressionAttibuteNames("val","200");
         //params.addExpressionAttributeValues("val",tmp);
@@ -165,26 +163,8 @@ public class db_cordinator {
         return curr_table.scan(params).getAllResults();
     }
 
-
-    /*private class CreateItemAsyncTask extends AsyncTask<Document, Void, Void> {
-        @Override
-        protected Void doInBackground(Document... documents) {
-            db_cordinator databaseAccess = db_cordinator.getInstance(screen);
-            databaseAccess.create(documents[0]);
-            return null;
-        }
+    public List<Document> updated_info(List<Document> memo){
+        return null;
     }
-    /**
-     * Event Handler called when the Save button is clicked
-     * param  the initiating view
-     *
-    private class GetAllItemsAsyncTask extends AsyncTask<Void, Void, List<Document>> {
-        @Override
-        protected List<Document> doInBackground(Void... params) {
-            db_cordinator databaseAccess = db_cordinator.getInstance(screen);
-            return databaseAccess.getAllMemos();
-        }
 
-
-    }*/
 }
