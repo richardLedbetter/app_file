@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         String TAG = "GOOGLE";
         Intent intent = getIntent();
         if(intent!=null){
-            Log.d(TAG, "onCreate: not null");
+
             Thread ta = new Thread(()->{
                 try{
                     //checks to see if user has signed in
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 Uri.parse("https://accounts.google.com/o/oauth2/v2/auth") /* auth endpoint */,
                 Uri.parse("https://www.googleapis.com/oauth2/v4/token") /* token endpoint */
         );
-        Log.d("view", "onCreate: ");
+
 
     }
 
@@ -228,13 +228,13 @@ public class MainActivity extends AppCompatActivity {
         AuthorizationException error = AuthorizationException.fromIntent(intent);
         final AuthState authState = new AuthState(response, error);
         if (response != null) {
-            Log.i(LOG_TAG, String.format("Handled Authorization Response %s ", authState.toJsonString()));
+
             AuthorizationService service = new AuthorizationService(this);
             service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
                 @Override
                 public void onTokenRequestCompleted(@Nullable TokenResponse tokenResponse, @Nullable AuthorizationException exception) {
                     if (exception != null) {
-                        Log.w(LOG_TAG, "Token Exchange failed", exception);
+
                     } else {
                         if (tokenResponse != null) {
                             authState.update(tokenResponse, exception);

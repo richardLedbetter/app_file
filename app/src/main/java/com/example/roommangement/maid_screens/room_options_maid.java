@@ -19,6 +19,9 @@ import com.example.roommangement.Maintance_screens.see_Maintence;
 import com.example.roommangement.R;
 import com.example.roommangement.Maintance_screens.Report_Maintence;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 public class room_options_maid extends AppCompatActivity {
     String TAG = "looik";
     LinearLayout ll;
@@ -63,9 +66,10 @@ public class room_options_maid extends AppCompatActivity {
             clean_btn.setHeight(dpHeight);
             clean_btn.setOnClickListener(v -> {
                 Runnable r = () -> {
-
+                    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                     Document builder = table.getMemoById(Room);
                     builder.put("room_status","clean");
+                    builder.put("time_stamp", timestamp.toString());
                     table.update(builder);
 
                 };

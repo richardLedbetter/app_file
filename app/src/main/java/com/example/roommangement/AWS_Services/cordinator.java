@@ -140,11 +140,12 @@ public class cordinator {
                 withBucketName("room-check-test")
                 .withPrefix(file_path).withDelimiter("/");
         ListObjectsV2Result listing = s3Client.listObjectsV2(req);
-        Boolean first = false;
         list_file = new file_list();
         for (S3ObjectSummary summary: listing.getObjectSummaries()) {
 
             file_path = summary.getKey();
+            String [] t = file_path.split("/");
+            //list_file.add(t[t.length-1]);
 
             transferObserverListener("download");
             Log.d("path2", file_path);
@@ -187,6 +188,7 @@ public class cordinator {
                     file_path,/* The key for the uploaded object */
                     list_file.add(f)     /* The file where the data to upload exists */
             );
+            list_file.set_curr_path(file_path);
         }
 
         transferObserver.setTransferListener(new TransferListener(){

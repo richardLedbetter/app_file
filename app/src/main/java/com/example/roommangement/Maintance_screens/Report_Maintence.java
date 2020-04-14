@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.Camera;
+import android.hardware.camera2.*;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.DisplayMetrics;
@@ -191,17 +192,23 @@ public class Report_Maintence extends AppCompatActivity {
 
 
 
+
+
+
     Camera.PictureCallback mPictureCallback = new Camera.PictureCallback() {
+        String TAG = "ERROR FINDER";
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
+            Log.d(TAG, "onPictureTaken: line 202");
             Camera.Parameters params = camera.getParameters();
-
+            Log.d(TAG, "onPictureTaken: line 203");
             try {
                 photo = File.createTempFile("photo", ".jpg");
             } catch (IOException e) {
                 e.printStackTrace();
             }
             try{
+                Log.d(TAG, "onPictureTaken: line 211");
                 FileOutputStream stream = new FileOutputStream(photo);
                 Bitmap t = BitmapFactory.decodeByteArray(data,0,data.length);
                 t.compress(Bitmap.CompressFormat.JPEG,75,stream);

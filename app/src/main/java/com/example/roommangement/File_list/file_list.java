@@ -5,31 +5,49 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 
+
+/*
+Linked list structure for Files downloaded from S3
+    Variables
+        first = head
+        curr= current
+        length = size of list
+
+  Subclass file_node contains
+     public File current;
+     public file_nodes next;
+     public String time_stamp;
+     public String cloud_path;
+
+ */
 public class file_list {
+    public String TAG = "file_list Documented";
+
+
     public file_nodes first;
     public file_nodes curr;
     public int length =0;
-    public file_list(File t){
-        length++;
-        first = new file_nodes();
-        first.current = t;
-        first.num = length;
-        curr = first;
-    }
+
+    //constructors
     public file_list(){
         first = null;
         curr = first;
     }
-    public void set_curr_path(String pa){
-        File tmp = new File(pa);
 
-        curr.current.renameTo(tmp);
-        Log.d("file_path", curr.current.getAbsolutePath());
+    //set/getter for cloud path of current node
+    public void set_curr_path(String pa){
+        curr.cloud_path = pa;
     }
+    public String get_curr_path(){
+        return curr.cloud_path;
+    }
+
+
+    //add file to list once downloaded
     public File add(String suf){
         length++;
         if (first==null){
-            Log.d("ran this", "add: 1");
+           // Log.d(TAG, "add: 1");
             first = new file_nodes();
             curr = first;
             try {
@@ -42,9 +60,10 @@ public class file_list {
                 }
 
             } catch (IOException e) {
+                Log.d(TAG,"=========ERROR=======");
                 e.printStackTrace();
             }
-            Log.d("File", first.current.getAbsolutePath());
+            //Log.d(TAG, first.current.getAbsolutePath());
             return first.current;
         }else{
            // Log.d("ran this", "add: 2");
@@ -59,34 +78,53 @@ public class file_list {
                     curr.current = File.createTempFile("photo",suf);
                 }
             } catch (IOException e) {
+                Log.d(TAG,"=========ERROR=======");
                 e.printStackTrace();
             }
-            Log.d("File", curr.current.getAbsolutePath());
+            //Log.d("File2", curr.current.getAbsolutePath());
             return curr.current;
         }
 
     }
-    public void setFirst(){
-//        Log.d("current1", curr.current.getName());
-        curr = first;
-//        Log.d("current2", curr.current.getName());
+
+
+    //returns current element
+    public file_nodes get_cur(){
+        return curr;
     }
-    public File get_cur(){
+
+    //gets current nodes file
+    public File get_curr_file(){
         return curr.current;
     }
+
+
+    //sets current back to first
+    public void curr_2_start(){
+        curr = first;
+    }
+
+    //moves linked list one
     public void move_one(){
         curr = curr.next;
     }
+
+    //used for debugging prints linked list pos
     public void print_num(){
-        Log.d("file_num", Integer.toString(curr.num));
+        Log.d(TAG+" file_num", Integer.toString(curr.num));
     }
+
+    //returns time stamp
     public String get_stamp(){
         return curr.time_stamp;
     }
+
+
 }
  class file_nodes{
      public File current;
      public file_nodes next;
      public String time_stamp;
+     public String cloud_path;
      int num =0;
 }

@@ -26,6 +26,10 @@ import java.nio.charset.Charset;
 
 public class see_Maintence extends AppCompatActivity {
 
+    String TAG = "see_Maintence commented";
+    String Rel_Path = "com/example/roommangement/maneger/see_past_cleaning_log.java";
+
+
     RecyclerView page;
     LinearLayout ll;
     db_cordinator table;
@@ -34,7 +38,6 @@ public class see_Maintence extends AppCompatActivity {
     int Room;
     int issue_num;
 
-    String TAG = "see_Maintence";
     download_files downlink;
     String curr_path;
 
@@ -58,7 +61,9 @@ public class see_Maintence extends AppCompatActivity {
 
 
         Runnable r = () -> {
+            Log.d(TAG, file_list[lookup]);
             downlink.vals.delete_file(file_list[lookup]);
+            downlink.vals.delete_file(file_list[lookup-1]);
             Document builder = table.getMemoById(Room);
             builder.put("maintence_issues",builder.get("maintence_issues").asInt()-1);
             table.update(builder);
@@ -90,7 +95,7 @@ public class see_Maintence extends AppCompatActivity {
         }
         file_list curr2 = downlink.vals.list_file;
         //Log.d(TAG, curr2.curr.]);
-        curr2.setFirst();
+        curr2.curr_2_start();
         file_list = new String[curr2.length];
         Log.d("length--sadf", Integer.toString(curr2.length));
         for (int i =0;i<curr2.length;i++){
@@ -103,13 +108,13 @@ public class see_Maintence extends AppCompatActivity {
             btn.setOnClickListener(v1->{
                 delete(btn.getId());
             });
-            file_list[i] = curr2.get_cur().getAbsolutePath();
-            Log.d("text file", curr2.get_cur().getAbsolutePath());
+            file_list[i] = curr2.get_curr_path();
+            Log.d("text file", curr2.get_curr_path());
             if (file_list[i].endsWith(".txt")){
-                Log.d("text file", Long.toString(curr2.get_cur().length()));
+               // Log.d("text file", Long.toString(curr2.get_cur().length()));
                 String tmp = "";
                 try {
-                   tmp =  Files.toString(curr2.get_cur(), Charset.defaultCharset());
+                   tmp =  Files.toString(curr2.get_curr_file(), Charset.defaultCharset());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -125,7 +130,7 @@ public class see_Maintence extends AppCompatActivity {
                     ll.addView(btn);
                 });
             }else {
-                bitmap = BitmapFactory.decodeFile(curr2.get_cur().getAbsolutePath());
+                bitmap = BitmapFactory.decodeFile(curr2.get_curr_file().getAbsolutePath());
                 photo_dis.setImageBitmap(bitmap);
                 photo_dis.setId(i);
                 Runnable t = () -> {

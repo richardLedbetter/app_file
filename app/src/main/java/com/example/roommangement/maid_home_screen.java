@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -202,7 +203,6 @@ public class maid_home_screen extends AppCompatActivity {
                 Button btnTag = new Button(this);
                 btnTag.setId(i);
                 btnTag.setWidth(99999);
-                btnTag.setHeight(200);
                 btnTag.setTextSize(28);
 
                 try {
@@ -210,9 +210,10 @@ public class maid_home_screen extends AppCompatActivity {
                     tmp = tmp + "Room: " + sample_room.getJSONObject("room_num").getString("value") + "\n";
                     tmp = tmp + "Status: " + sample_room.getJSONObject("room_status").getString("value") + "\n";
                     tmp = tmp + "cleaned by: " + sample_room.getJSONObject("cleaned_by").getString("value") + "\n";
-                    tmp = tmp + "issues: " + sample_room.getJSONObject("maintence_issues").getString("value") + "\n";
+                    tmp = tmp + "issues: " + sample_room.getJSONObject("maintence_issues").getString("value");
                     btnTag.setText(tmp);
                     btnTag.setId(Integer.parseInt(sample_room.getJSONObject("room_num").getString("value")));
+
                     List<Document> finalRooms_table = rooms_table;
                     int finalI = i;
                     btnTag.setOnClickListener(v1 -> {
@@ -225,6 +226,8 @@ public class maid_home_screen extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 Runnable add = () -> {
+                    btnTag.setLayoutParams(new ViewGroup.LayoutParams
+                            (ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                     ll.addView(btnTag);
                 };
                 runOnUiThread(add);

@@ -15,6 +15,7 @@ import com.example.roommangement.AWS_Services.download_files;
 import com.example.roommangement.AWS_Services.upload_files;
 import com.example.roommangement.AWS_dynamodb.db_cordinator;
 import com.example.roommangement.R;
+import com.example.roommangement.status_reports.metric_view;
 
 import org.json.JSONArray;
 
@@ -65,6 +66,16 @@ public class settings extends AppCompatActivity {
             unclean_all_rooms();
         });
         page.addView(t2);
+
+        Button t3 = new Button(this);
+        t3.setWidth(dpwidth);
+        t3.setHeight(dpHeight/5);
+        t3.setText("Room statics");
+        t3.setTextSize(40);
+        t3.setOnClickListener(v1->{
+            see_metrics();
+        });
+        page.addView(t3);
 
     }
     public List<Document> onSaveClicked() {
@@ -149,10 +160,14 @@ public class settings extends AppCompatActivity {
         task2.start();
         finish();
     }
-
     public void see_past_data(){
         Intent intent = new Intent(settings.this,see_past_data.class);
         startActivity(intent);
 
+    }
+    //to metric_view
+    public void see_metrics(){
+        Intent intent = new Intent(settings.this, metric_view.class);
+        startActivity(intent);
     }
 }

@@ -39,14 +39,16 @@ public class see_past_data extends AppCompatActivity {
         downlink.set_room("past");
         downlink.vals.set_file_path();
         downlink.setScreen(this);
-        //downlink.s3credentialsProvider();
         downlink.setTransferUtility();
+
+
         Log.d("see_past_data", downlink.vals.file_path);
         downlink.vals.get_folder();
         int length = downlink.vals.list_file.length;
         file_list list_file = downlink.vals.list_file;
+        list_file.curr_2_start();
+        Log.d("files downloaded", Integer.toString(list_file.length));
         for (int i =0; i<length;i++){
-            //String []tmp = list_file.get_cur().getAbsolutePath().split("/");
             Button btn = new Button(this);
             btn.setText(list_file.get_stamp());
             btn.setTextSize(30);
@@ -61,7 +63,7 @@ public class see_past_data extends AppCompatActivity {
                 intent.putExtra("length",btn.getId());
                 startActivity(intent);
             });
-
+           list_file.move_one();
         }
     }
 }

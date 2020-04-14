@@ -22,7 +22,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view_selector"></activity>
+        <activity android:name=".status_reports.metric_view"></activity>
+        <activity android:name=".view_selector" />
         <activity android:name=".AuthenticatorActivity" />
         <activity android:name=".maneger.see_past_cleaning_log" />
         <activity android:name=".maneger.see_past_data" />
