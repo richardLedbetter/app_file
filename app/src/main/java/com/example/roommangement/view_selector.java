@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.example.roommangement.AWS_Cognito.aws_cognito;
@@ -52,6 +54,10 @@ public class view_selector extends AppCompatActivity {
         auth_lvl = auths.get_auth();
         creds = aws_cognito.getInstance();
         Hotels = 1;//auth_lvl.get_Hotel();
+        TextView title = findViewById(R.id.Title);
+        title.setText("HOTELS");
+        title.setTextSize(40);
+        title.setGravity(Gravity.CENTER);
         Thread date = new Thread(()->{
             Log.d(" happening ", "onCreate: ");
             datebase_int();
@@ -76,8 +82,9 @@ public class view_selector extends AppCompatActivity {
             Log.d("returned val:", info.toString());
             Iterator<String> keys = info.keys();
             if(info.length()==1){
-
+                //move to next screen
             }else {
+
                 for (int i = 0; i < info.length(); i++) {
                     String Room = keys.next();
                     int auth_lvl_local = info.getInt(Room);
@@ -85,7 +92,7 @@ public class view_selector extends AppCompatActivity {
                     tmp_btn.setWidth(dpwidth);
                     tmp_btn.setHeight(dpHeight / 5);
                     tmp_btn.setTextSize(40);
-                    tmp_btn.setText(Room + "\n" + auth_lvl_local);
+                    tmp_btn.setText(Room + "\n");
                     tmp_btn.setId(i);
                     tmp_btn.setOnClickListener(v1 -> {
                         Remove_Hotels();

@@ -165,7 +165,12 @@ public class cordinator {
         download_complete =false;
         TransferObserver transferObserver;
         if (up_down == "upload") {
-            Log.d("things->", file.getName());
+            Log.d("things->", file_path);
+            if(transferUtility==null){
+                Log.d("brooken","test");
+                transferUtility = new TransferUtility(s3Client,
+                        screen);
+            }
             transferObserver = transferUtility.upload(
                     "room-check-test",          /* The bucket to upload to */
                     file_path,/* The key for the uploaded object */

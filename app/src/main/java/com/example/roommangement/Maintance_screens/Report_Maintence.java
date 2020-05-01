@@ -44,6 +44,9 @@ public class Report_Maintence extends AppCompatActivity {
     int Room;
     int issue_num;
 
+
+    String TAG = "Report_Maintence";
+
     //views
     RecyclerView r;
     FrameLayout frameLayout;
@@ -116,6 +119,7 @@ public class Report_Maintence extends AppCompatActivity {
         uploader.vals.set_Hotel_room(Integer.toString(Room));
         uploader.vals.set_issue_path(Long.toString(System.currentTimeMillis())+".jpg");
         uploader.set_file(photo);
+        Log.d(TAG, photo.toString());
         uploader.vals.transferObserverListener("upload");
 
         try {

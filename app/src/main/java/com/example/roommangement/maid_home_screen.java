@@ -3,16 +3,12 @@ package com.example.roommangement;
 
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,13 +29,19 @@ import java.util.Collections;
 import java.util.List;
 
 public class maid_home_screen extends AppCompatActivity {
+    String TAG = "maid_home_screen";
+    String class_path = "com/example/roommangement/maid_home_screen.java";
 
-    download_files downlink = download_files.get_server_down();
-    db_cordinator table = db_cordinator.getInstance(this);
+    //setting up variables
+    download_files downlink = download_files.get_server_down();//s3
+    db_cordinator table = db_cordinator.getInstance(this);//dynamodb
+
+    //layout options
     SwipeRefreshLayout pullToRefresh;
     LinearLayout ll;
-    auths auth_lvl = auths.get_auth();
 
+    //misc variables
+    auths auth_lvl = auths.get_auth();
     String curr_path;
     Thread task1,task2,task3;
 
@@ -47,59 +49,56 @@ public class maid_home_screen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maid_home_screen);
+        Log.d(TAG, "path: "+class_path);
+
+        //setting up layout view
         ll =  (LinearLayout)(findViewById(R.id.ll));
-        set_up();
+        set_up();//populates screen
+
 
         pullToRefresh = (SwipeRefreshLayout)findViewById(R.id.sprit);
-        Log.d("MS1", Integer.toString(pullToRefresh.getWidth()));
-        pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                ll.removeAllViews();
-                Log.d("maneger_screen_one", "onRefresh: ");
-                set_up();
-                pullToRefresh.setRefreshing(false);
-            }
+        pullToRefresh.setOnRefreshListener(() -> {
+            ll.removeAllViews();//clears screen
+            set_up();//populates screen
+            pullToRefresh.setRefreshing(false);
         });
     }
 
     public void set_up(){
-        Button other_features = new Button(this);
-        other_features.setText("Other features");
-        other_features.setTextSize(50);
-        other_features.setOnClickListener(v1->{
-            Intent intent = new Intent(maid_home_screen.this, settings.class);
-            startActivity(intent);
-        });
-        if (auth_lvl.auth_lvl==3){
-            ll.addView(other_features);
-        }
+        //variable deceleration
         Button floor_1 = new Button(this);
         Button floor_2 = new Button(this);
+        Button other_features = new Button(this);
+
+
+        //auth lvl 1 maid
 
         final Boolean[] floor_1_clicked = {false};
-        floor_1.setText("floor 1 ⌄");
+        floor_1.setText("floor 1 >");
         floor_1.setTextSize(50);
         floor_1.setOnClickListener(v1->{
 
             Runnable update_screen = ()-> {
+                //
                 if (auth_lvl.auth_lvl == 3){
                     runOnUiThread(()->{
                         ll.removeAllViews();
                         ll.addView(other_features);
                     });
-                }
-                runOnUiThread(()->{
-                    if (auth_lvl.auth_lvl != 3){
+                }else{
+                    runOnUiThread(()->{
                         ll.removeAllViews();
-                    }
+                        ll.addView(floor_1);
+                    });
+                }
 
-                    ll.addView(floor_1);
-                });
+
                 if (floor_1_clicked[0]){
+                    floor_1.setText("floor 1 >");
                     floor_1_clicked[0] = false;
                 }else{
-                    other_stuff(1);
+                    floor_1.setText("floor 1 ⌄");
+                    retrieve_rooms(1);
                     floor_1_clicked[0] = true;
                 }
                 runOnUiThread(()->{
@@ -112,8 +111,13 @@ public class maid_home_screen extends AppCompatActivity {
 
         });
 
+        //auth lvl 2 maintenance
+
+
+
         final boolean [] floor_2_clicked = {false};
-        floor_2.setText("floor 2 ⌄");
+        floor_2.setText("floor 2 >");
+        //shows
         floor_2.setOnClickListener(v1->{
             if (auth_lvl.auth_lvl == 3){
                 runOnUiThread(()->{
@@ -132,9 +136,11 @@ public class maid_home_screen extends AppCompatActivity {
             });
             Runnable update_screen = ()-> {
                 if (floor_2_clicked[0]){
+                    floor_2.setText("floor 2 >");
                     floor_2_clicked[0] = false;
                 }else{
-                    other_stuff(2);
+                    floor_2.setText("floor 2 ⌄");
+                    retrieve_rooms(2);
                     floor_2_clicked[0] = true;
                 }
 
@@ -143,16 +149,31 @@ public class maid_home_screen extends AppCompatActivity {
             task2.start();
         });
         floor_2.setTextSize(50);
+
+        //auth lvl 3 manager/owner
+
+        other_features.setText("Other features");
+        other_features.setTextSize(50);
+
+        other_features.setOnClickListener(v1->{
+            Intent intent = new Intent(maid_home_screen.this, settings.class);
+            startActivity(intent);
+        });
+
+        //adds buttons to screen
         runOnUiThread(()->{
+            if (auth_lvl.auth_lvl==3){
+                ll.addView(other_features);
+            }
             ll.addView(floor_1);
             ll.addView(floor_2);
         });
 
+
+
     }
 
     public List<Document> onSaveClicked() {
-        String TAG = "database:";
-        Document memo = new Document();
         table.set_Table_name("test_sample");
         try{
             table.load_table();
@@ -176,7 +197,6 @@ public class maid_home_screen extends AppCompatActivity {
         for (int i =0; i<rooms_table.size(); i++){
             int room_floor = 0;
             try {
-                String TAG = "Room";
                 sample_room = new JSONObject(rooms_table.get(i).toString());
                 //Log.d(TAG, sample_room.toString());
                 issue_num = Integer.parseInt(sample_room.
@@ -206,11 +226,13 @@ public class maid_home_screen extends AppCompatActivity {
                 btnTag.setTextSize(28);
 
                 try {
+                    //builds button text
                     String tmp = "";
                     tmp = tmp + "Room: " + sample_room.getJSONObject("room_num").getString("value") + "\n";
                     tmp = tmp + "Status: " + sample_room.getJSONObject("room_status").getString("value") + "\n";
                     tmp = tmp + "cleaned by: " + sample_room.getJSONObject("cleaned_by").getString("value") + "\n";
                     tmp = tmp + "issues: " + sample_room.getJSONObject("maintence_issues").getString("value");
+
                     btnTag.setText(tmp);
                     btnTag.setId(Integer.parseInt(sample_room.getJSONObject("room_num").getString("value")));
 
@@ -238,46 +260,19 @@ public class maid_home_screen extends AppCompatActivity {
 
     public void Room_select(int room_num){
         Intent intent = new Intent(maid_home_screen.this, room_options_maid.class);
-        // Log.d("Room_number is:", Integer.toString(room_num));
+
         intent.putExtra("Room_num",room_num);
 
         startActivity(intent);
     }
 
-    public void other_stuff(int floor){
+    public void retrieve_rooms(int floor){
+
         List<Document> rooms_table = onSaveClicked();
-        String TAG = "ROOM:";
-        for (int i =0;i<rooms_table.size();i++){
-            Log.d(TAG, rooms_table.get(i).toString());
-        }
 
+        //sorting returned Rooms
         rooms_table = sorter(rooms_table);
-
-
-         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(R.layout.activity_maid_home_screen, null);
-        ScrollView sv = (ScrollView) v.findViewById(R.id.some);
-        // Find the ScrollView
         showRoom(rooms_table,floor);
-
-
-        // Add text
-
-        int num_rooms = 0;
-        //Button btnTag;
-       // String TAG = "ran";
-
-
-
-
-       int room_num = 0;
-        String cleaned_by ="";
-        String info = "";
-        String room_sts = "";
-        String rep_prob = "";
-
-
-
 
 
     }

@@ -25,6 +25,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
@@ -92,6 +93,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
+    String TAG = "MainActivity";
+
 
     //Display values
     DisplayMetrics displayMetrics;
@@ -110,8 +113,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        String Class_PATH = "com/example/roommangement/MainActivity.java";
+        Log.d(TAG, "Path:"+ Class_PATH);
 
         //Metrics for displaying on screen XML
         displayMetrics = this.getResources().getDisplayMetrics();
@@ -120,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
 
 
        // ProgressBar pgsBar;
-        String TAG = "GOOGLE";
         Intent intent = getIntent();
         if(intent!=null){
 
@@ -140,12 +146,15 @@ public class MainActivity extends AppCompatActivity {
                     pgsBar.setVisibility(View.VISIBLE);
 
                     //display loading
-                    TextView words = findViewById(R.id.log);
-                    words.setVisibility(View.VISIBLE);
-                    words.setText("Loging in");
-                    words.setTextSize(40);
-                    words.setX((dpwidth-200)/2);
-                    words.setY((dpHeight-73)/3);
+                    runOnUiThread(()->{
+                        TextView words = findViewById(R.id.log);
+                        words.setVisibility(View.VISIBLE);
+                        words.setText("logging in");
+                        words.setTextSize(40);
+                        words.setX((dpwidth-words.getWidth()-200)/2);
+                        words.setY((dpHeight-73)/3);
+                    });
+
                 }catch (Exception e){
                     Log.d(TAG, "not logged in");
                 }
@@ -166,22 +175,24 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void google_log_in(View view){//log-in including O-auth sign-in
-
+        //source for google O-auth
         //https://codelabs.developers.google.com/codelabs/appauth-android-codelab/#5
         Thread tmp = new Thread(()->{
             //google api info
             String clientId = "742932088080-l4ve9odnp9j10gd65hectcks1vktbvra.apps.googleusercontent.com";
-            String url="com.example.roommangement%3A/oauth2redirect";
+            //where the app info is past back too
             Uri redirectUri = Uri.parse("com.example.roommangement:/oauth2callback");
             //end google api info
 
             //build
+            //displays the google log in though a web view
             AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
                     serviceConfiguration,
                     clientId,
                     AuthorizationRequest.RESPONSE_TYPE_CODE,
                     redirectUri
             );
+
             builder.setScopes("profile");
             AuthorizationRequest request = builder.build();
 
@@ -195,7 +206,8 @@ public class MainActivity extends AppCompatActivity {
         tmp.start();
     }
 
-    public void onClick() {
+    public void next_screen() {
+
         Intent intent = new Intent(MainActivity.this, view_selector.class);
         startActivity(intent);
     }
@@ -205,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkIntent(@Nullable Intent intent) {
+        //checks to see if an oauth-key has been given
         if (intent != null) {
             String action = intent.getAction();
             switch (action) {
@@ -223,10 +236,13 @@ public class MainActivity extends AppCompatActivity {
     //stuff happens here
     //sets up auth for tables and Cognito
     private void handleAuthorizationResponse(@NonNull Intent intent) {
-        String LOG_TAG = "new copied stuff";
+        //handles response from google
+        //Initialize variables
         AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
         AuthorizationException error = AuthorizationException.fromIntent(intent);
         final AuthState authState = new AuthState(response, error);
+
+
         if (response != null) {
 
             AuthorizationService service = new AuthorizationService(this);
@@ -237,17 +253,25 @@ public class MainActivity extends AppCompatActivity {
 
                     } else {
                         if (tokenResponse != null) {
+                            //this is for a successful response from google
+                            //gets token
                             authState.update(tokenResponse, exception);
                             persistAuthState(authState);
-
+                            //builds hashmap to pass to aws api
                             Map<String, String> logins = new HashMap<String, String>();
                             logins.put("accounts.google.com", tokenResponse.idToken);
+
+
                             Thread task1 = new Thread(()->{
+                                //takes hashmap and gives it to
                                 download_files tmp  = download_files.get_server_down();
                                 tmp.setScreen(holder);
+                                //S3 auth
                                 tmp.s3credentialsProvider(logins);
-
+                                //dynamo auth
                                 db_cordinator tmp2 = db_cordinator.getInstance(holder);
+                                //TO-DO lambda auth
+
                                 tmp2.set_token(logins);
                             });
                             Thread task2 = new Thread(()->{
@@ -258,9 +282,7 @@ public class MainActivity extends AppCompatActivity {
                             });
                             task2.start();
                             task1.start();
-                            String TAG = "line 269";
-                            Log.d(TAG, "onTokenRequestCompleted: ");
-                            onClick();
+                            next_screen();
                         }
                     }
                 }
@@ -269,42 +291,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void persistAuthState(@NonNull AuthState authState) {
+        //may not need
         getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
                 .putString(AUTH_STATE, authState.toJsonString())
                 .commit();
-        enablePostAuthorizationFlows();
+        //enablePostAuthorizationFlows();
     }
 
-    private void enablePostAuthorizationFlows() {
-        mAuthState = restoreAuthState();
-        if (mAuthState != null && mAuthState.isAuthorized()) {
-           /* if (mMakeApiCall.getVisibility() == View.GONE) {
-                mMakeApiCall.setVisibility(View.VISIBLE);
-                mMakeApiCall.setOnClickListener(new MakeApiCallListener(this, mAuthState, new AuthorizationService(this)));
-            }
-            if (mSignOut.getVisibility() == View.GONE) {
-                mSignOut.setVisibility(View.VISIBLE);
-                mSignOut.setOnClickListener(new SignOutListener(this));
-            }*/
-        } else {
-            /*mMakeApiCall.setVisibility(View.GONE);
-            mSignOut.setVisibility(View.GONE);*/
-        }
-    }
-
-    @Nullable
-    private AuthState restoreAuthState() {
-        String jsonString = getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-                .getString(AUTH_STATE, null);
-        if (!TextUtils.isEmpty(jsonString)) {
-            try {
-                return AuthState.fromJson(jsonString);
-            } catch (JSONException jsonException) {
-                // should never happen
-            }
-        }
-        return null;
-    }
 
 
 }
